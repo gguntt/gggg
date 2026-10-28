@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>근태's Smart 파일 압축기 &amp; 변환기 | 국립한국해양대학교</title>
+  <meta name="description"
+    content="한국해양대학교 스마트 파일 압축 및 변환 서비스. PDF, HWP, DOCX, XLSX, PPTX, JPG, PNG, WEBP, GIF, HEIC 상호 변환 및 고효율 압축을 지원합니다.">
+
+  <!-- Google Fonts: Pretendard & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- JSZip & FileSaver -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- PDF.js for PDF to Image Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- jsPDF for Image / Text to PDF Conversion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- SheetJS for Excel Conversion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- heic2any for HEIC image conversion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Top Navigation Bar -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <!-- 2. 화면 왼쪽 상단 한국해양대학교 로고 (클릭 시 https://kmou.ac.kr 이동) -->
+      <a href="https://kmou.ac.kr" target="_blank" rel="noopener noreferrer" class="logo-link"
+        title="국립한국해양대학교 공식 홈페이지 바로가기 (https://kmou.ac.kr)">
+        <div class="logo-img-wrapper">
+          <img src="kmou_logo.svg" alt="국립한국해양대학교 로고" class="kmou-logo">
+        </div>
+        <div class="logo-text">
+          <span class="univ-name">국립한국해양대학교</span>
+          <span class="service-name">스마트 파일 솔루션</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Mode Switcher Tabs in Header -->
+    <div class="mode-tabs">
+      <button type="button" class="mode-tab-btn active" id="tabCompressor">
+        <i class="fa-solid fa-file-zipper"></i>
+        <span>파일 압축기</span>
+      </button>
+      <button type="button" class="mode-tab-btn" id="tabConverter">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <span>파일 변환기</span>
+      </button>
+    </div>
+
+    <!-- 1. 오른쪽 상단 히스토리 및 변환기 토글 버튼 -->
+    <div class="nav-right">
+      <button type="button" class="history-toggle-btn" id="historyBtn" title="과거 압축/변환 진행 내역 보기">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>작업 기록</span>
+        <span class="history-count-badge" id="historyCountBadge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- =========================================================================
+         SECTION A: FILE COMPRESSOR VIEW (파일 압축기 화면)
+         ========================================================================= -->
+    <div class="view-section active" id="viewCompressor">
+      <div class="hero-section">
+        <div class="hero-badge">
+          <i class="fa-solid fa-bolt-lightning"></i> 고효율 다중 포맷 무손실 압축 엔진
+        </div>
+        <h1 class="main-title">근태's Smart 파일 압축기</h1>
+        <p class="main-subtitle">
+          PDF, PPT, Word, 한글(HWP), TXT, 이미지 등 서로 다른 포맷의 파일도 한 번에 선택하여 ZIP 파일로 빠르게 압축하세요.
+        </p>
+      </div>
+
+      <!-- Center Card: File Compression Workspace -->
+      <div class="compress-card" id="compressCard">
+
+        <!-- 1. Upload Dropzone Section (초기 UI) -->
+        <div class="card-step step-upload active" id="stepUpload">
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" class="file-input-hidden" multiple
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.hwp,.txt,.jpg,.jpeg,.png,.gif">
+
+            <div class="drop-zone-content">
+              <div class="upload-icon-wrapper">
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+              </div>
+              <h2 class="drop-title">압축할 파일을 여기에 끌어다 놓으세요</h2>
+              <p class="drop-desc">여러 포맷의 파일을 한 번에 다중 선택하여 압축할 수 있습니다</p>
+
+              <button type="button" class="btn-primary" id="selectFileBtn">
+                <i class="fa-solid fa-folder-open"></i>
+                <span>파일 선택하기 (다중 가능)</span>
+              </button>
+
+              <div class="supported-formats">
+                <span class="format-label"><i class="fa-regular fa-file-lines"></i> 지원 포맷:</span>
+                <div class="format-tags">
+                  <span class="badge pdf">PDF</span>
+                  <span class="badge doc">DOC/DOCX</span>
+                  <span class="badge ppt">PPT/PPTX</span>
+                  <span class="badge hwp">HWP</span>
+                  <span class="badge txt">TXT</span>
+                  <span class="badge img">JPG/PNG/GIF</span>
+                </div>
+              </div>
+
+              <div class="format-note">
+                <i class="fa-solid fa-circle-info"></i> 오디오 및 비디오 파일은 제외되며, 문서 및 이미지 파일만 지원합니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Selected Files List & Confirmation Section -->
+        <div class="card-step step-list" id="stepList">
+          <div class="file-list-box">
+            <div class="list-header">
+              <div class="list-title-group">
+                <h2 class="list-title"><i class="fa-solid fa-layer-group"></i> 압축 대상 파일 목록</h2>
+                <span class="list-count" id="listTotalCount">총 0개 파일</span>
+              </div>
+              <button type="button" class="btn-add-more" id="addMoreFilesBtn">
+                <i class="fa-solid fa-plus"></i>
+                <span>파일 추가</span>
+              </button>
+            </div>
+
+            <!-- File Items Container -->
+            <div class="file-items-scroll" id="fileItemsContainer">
+              <!-- Dynamic File Items Rendered Here -->
+            </div>
+
+            <!-- Confirmation Banner -->
+            <div class="confirm-prompt-card">
+              <div class="confirm-icon"><i class="fa-solid fa-circle-question"></i></div>
+              <div class="confirm-text">
+                <h4>선택한 파일의 압축을 진행하시겠습니까?</h4>
+                <p id="confirmSummaryText">총 0개의 파일 (총 용량: 0 KB)을 고효율 DEFLATE 알고리즘으로 압축합니다.</p>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="list-actions">
+              <button type="button" class="btn-cancel" id="cancelListBtn">
+                <i class="fa-solid fa-xmark"></i>
+                <span>취소</span>
+              </button>
+              <button type="button" class="btn-confirm-compress" id="confirmCompressBtn">
+                <i class="fa-solid fa-bolt"></i>
+                <span>압축 시작하기 (확인)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Compression Progress Section (3-3 초록색 프로그레스 바) -->
+        <div class="card-step step-progress" id="stepProgress">
+          <div class="progress-box">
+            <div class="processing-file-info">
+              <div class="file-icon-box" id="progressFileIcon">
+                <i class="fa-solid fa-file-zipper"></i>
+              </div>
+              <div class="file-meta">
+                <div class="file-name" id="progressFileName">압축 진행 중인 파일...</div>
+                <div class="file-size" id="progressFileSize">총 0 KB</div>
+              </div>
+            </div>
+
+            <div class="progress-header">
+              <span class="progress-status-text" id="progressStatusText">파일 분석 및 압축 준비 중...</span>
+              <span class="progress-percentage" id="progressPercentage">0%</span>
+            </div>
+
+            <!-- Green Progress Bar (0% ~ 100%) -->
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+            </div>
+
+            <p class="progress-sub-info">
+              <i class="fa-solid fa-gears fa-spin"></i> 고압축 무손실 알고리즘을 적용하여 파일 용량을 최적화하고 있습니다.
+            </p>
+          </div>
+        </div>
+
+        <!-- 4. Compression Result & Download Section -->
+        <div class="card-step step-result" id="stepResult">
+          <div class="result-box">
+            <div class="success-icon-badge">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h2 class="result-title">압축이 성공적으로 완료되었습니다!</h2>
+            <p class="result-subtitle">아래에서 파일명을 확인하고 저장할 위치를 선택하여 다운로드하세요.</p>
+
+            <!-- Compression Stats Comparison -->
+            <div class="stats-container">
+              <div class="stat-item">
+                <span class="stat-label">원본 총 크기</span>
+                <span class="stat-value original" id="originalSizeDisplay">0 KB</span>
+              </div>
+              <div class="stat-arrow">
+                <i class="fa-solid fa-arrow-right"></i>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">압축 후 크기</span>
+                <span class="stat-value compressed" id="compressedSizeDisplay">0 KB</span>
+              </div>
+              <div class="stat-reduction-box" id="reductionBadge">
+                <span class="reduction-label">용량 절감</span>
+                <span class="reduction-percent" id="reductionPercentDisplay">-0%</span>
+              </div>
+            </div>
+
+            <!-- File Name Verification & Edit Input -->
+            <div class="filename-edit-group">
+              <label for="fileNameInput" class="filename-label">
+                <i class="fa-solid fa-pen-to-square"></i> 저장할 파일명 확인 및 수정
+              </label>
+              <div class="filename-input-wrapper">
+                <input type="text" id="fileNameInput" class="filename-input" placeholder="압축 파일명을 입력하세요"
+                  spellcheck="false">
+                <span class="extension-tag">.zip</span>
+              </div>
+              <p class="filename-help">
+                <i class="fa-solid fa-circle-info"></i> 다운로드 버튼을 누르면 <strong>내 컴퓨터의 원하는 위치(바탕화면, D 드라이브 등)를
+                  선택</strong>하여 저장할 수 있습니다.
+              </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="result-actions">
+              <button type="button" class="btn-download" id="downloadBtn" title="원하는 폴더 위치를 선택하여 다운로드">
+                <i class="fa-solid fa-folder-arrow-down"></i>
+                <span>위치 선택 다운로드 (.zip)</span>
+              </button>
+              <button type="button" class="btn-share" id="shareBtn" title="Google 드라이브 및 Gmail로 공유">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>공유하기</span>
+              </button>
+              <button type="button" class="btn-secondary" id="resetBtn">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>다른 파일 압축</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         SECTION B: FILE CONVERTER VIEW (신규 요구사항 1: 파일간 변환기)
+         ========================================================================= -->
+    <div class="view-section" id="viewConverter">
+      <div class="hero-section">
+        <div class="hero-badge converter-badge">
+          <i class="fa-solid fa-arrows-rotate"></i> 스마트 다중 포맷 상호 변환 엔진
+        </div>
+        <h1 class="main-title">근태's Smart 파일 변환기</h1>
+        <p class="main-subtitle">
+          PDF, HWP, DOCX, XLSX, PPTX 문서 및 JPG, PNG, WEBP, GIF, HEIC 이미지를 자유롭게 상호 변환하세요.
+        </p>
+      </div>
+
+      <!-- Converter Workspace Card -->
+      <div class="compress-card" id="converterCard">
+
+        <!-- Step C1: Converter Upload Dropzone -->
+        <div class="card-step step-upload active" id="convStepUpload">
+          <div class="drop-zone converter-drop-zone" id="convDropZone">
+            <input type="file" id="convFileInput" class="file-input-hidden"
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.hwp,.txt,.jpg,.jpeg,.png,.webp,.gif,.heic">
+
+            <div class="drop-zone-content">
+              <div class="upload-icon-wrapper converter-icon-bg">
+                <i class="fa-solid fa-arrows-spin upload-icon"></i>
+              </div>
+              <h2 class="drop-title">변환할 파일을 여기에 끌어다 놓으세요</h2>
+              <p class="drop-desc">문서(PDF/HWP/DOCX/XLSX/PPTX) 및 이미지(JPG/PNG/WEBP/GIF/HEIC) 상호 변환</p>
+
+              <button type="button" class="btn-primary btn-converter-primary" id="convSelectFileBtn">
+                <i class="fa-solid fa-file-export"></i>
+                <span>변환할 파일 선택하기</span>
+              </button>
+
+              <!-- Conversion Capability Matrix Info -->
+              <div class="conversion-pills">
+                <div class="conv-pill-group">
+                  <span class="pill-title"><i class="fa-solid fa-file-pdf"></i> 문서 상호 변환:</span>
+                  <span class="pill-item">PDF ⇄ HWP ⇄ DOCX ⇄ XLSX ⇄ PPTX</span>
+                </div>
+                <div class="conv-pill-group">
+                  <span class="pill-title"><i class="fa-regular fa-image"></i> 이미지 상호 변환:</span>
+                  <span class="pill-item">JPG ⇄ PNG ⇄ WEBP ⇄ GIF ⇄ HEIC</span>
+                </div>
+                <div class="conv-pill-group">
+                  <span class="pill-title"><i class="fa-solid fa-shuffle"></i> 문서 ⇄ 이미지 변환:</span>
+                  <span class="pill-item">PDF/문서 ⇄ JPG/PNG/WEBP</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step C2: Target Format Selection & Confirmation -->
+        <div class="card-step step-list" id="convStepSelect">
+          <div class="file-list-box">
+            <div class="selected-conv-file-card">
+              <div class="file-item-main">
+                <div class="file-item-icon" id="convSelectedFileIcon">
+                  <i class="fa-solid fa-file"></i>
+                </div>
+                <div class="file-item-details">
+                  <div class="file-item-name" id="convSelectedFileName">파일명.pdf</div>
+                  <div class="file-item-size" id="convSelectedFileSize">0 KB • 원본 형식: PDF</div>
+                </div>
+              </div>
+              <button type="button" class="btn-remove-file" id="convChangeFileBtn" title="다른 파일 선택">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+
+            <!-- Target Format Selector -->
+            <div class="format-selection-group">
+              <label class="conv-label"><i class="fa-solid fa-arrow-right-arrow-left"></i> 변환할 목표 포맷(형식)을 선택하세요:</label>
+              <div class="target-formats-grid" id="targetFormatsContainer">
+                <!-- Target Format Options Dynamically Generated -->
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="list-actions">
+              <button type="button" class="btn-cancel" id="convCancelBtn">
+                <i class="fa-solid fa-xmark"></i>
+                <span>취소</span>
+              </button>
+              <button type="button" class="btn-confirm-compress btn-converter-primary" id="startConvertBtn">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>변환 시작하기</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step C3: Converting Progress Bar -->
+        <div class="card-step step-progress" id="convStepProgress">
+          <div class="progress-box">
+            <div class="processing-file-info">
+              <div class="file-icon-box" id="convProgressIcon">
+                <i class="fa-solid fa-arrows-spin fa-spin"></i>
+              </div>
+              <div class="file-meta">
+                <div class="file-name" id="convProgressFileName">파일 변환 처리 중...</div>
+                <div class="file-size" id="convProgressMeta">변환 목표 포맷: JPG</div>
+              </div>
+            </div>
+
+            <div class="progress-header">
+              <span class="progress-status-text" id="convProgressStatusText">파일 파싱 및 포맷 변환 중...</span>
+              <span class="progress-percentage" id="convProgressPercentage">0%</span>
+            </div>
+
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill conv-progress-fill" id="convProgressBarFill" style="width: 0%;"></div>
+            </div>
+
+            <p class="progress-sub-info">
+              <i class="fa-solid fa-circle-notch fa-spin"></i> 고해상도 포맷 변환 엔진을 구동하고 있습니다.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step C4: Conversion Completed & Download -->
+        <div class="card-step step-result" id="convStepResult">
+          <div class="result-box">
+            <div class="success-icon-badge">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h2 class="result-title">파일 변환이 완료되었습니다!</h2>
+            <p class="result-subtitle">변환된 파일을 확인하고 원하는 위치에 다운로드하세요.</p>
+
+            <div class="conv-result-summary">
+              <div class="conv-summary-item">
+                <span class="label">원본 파일</span>
+                <span class="val" id="convResultOriginalName">doc.pdf</span>
+              </div>
+              <div class="conv-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              <div class="conv-summary-item highlight">
+                <span class="label">변환된 파일</span>
+                <span class="val" id="convResultTargetName">doc.docx</span>
+              </div>
+            </div>
+
+            <!-- Filename Edit -->
+            <div class="filename-edit-group">
+              <label for="convFileNameInput" class="filename-label">
+                <i class="fa-solid fa-pen-to-square"></i> 저장할 파일명 확인 및 수정
+              </label>
+              <div class="filename-input-wrapper">
+                <input type="text" id="convFileNameInput" class="filename-input" placeholder="변환된 파일명을 입력하세요">
+                <span class="extension-tag" id="convExtensionTag">.docx</span>
+              </div>
+            </div>
+
+            <!-- Result Actions -->
+            <div class="result-actions">
+              <button type="button" class="btn-download" id="convDownloadBtn" title="원하는 폴더 위치를 선택하여 다운로드">
+                <i class="fa-solid fa-folder-arrow-down"></i>
+                <span>위치 선택 다운로드</span>
+              </button>
+              <button type="button" class="btn-share" id="convShareBtn" title="Google 드라이브 및 Gmail로 공유">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>공유하기</span>
+              </button>
+              <button type="button" class="btn-secondary" id="convResetBtn">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>다른 파일 변환</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Feature Info Cards -->
+    <section class="features-grid">
+      <div class="feature-item">
+        <div class="feat-icon"><i class="fa-solid fa-shield-check"></i></div>
+        <h3>안전한 개인정보 보호</h3>
+        <p>서버로 파일을 전송하지 않고 브라우저 내부에서 100% 안전하게 압축 및 변환 처리됩니다.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feat-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+        <h3>문서 &amp; 이미지 자유 변환</h3>
+        <p>PDF, HWP, DOCX, XLSX, PPTX 및 JPG, PNG, WEBP, GIF, HEIC 간의 상호 변환을 지원합니다.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feat-icon"><i class="fa-solid fa-folder-tree"></i></div>
+        <h3>자유로운 저장 위치 선택</h3>
+        <p>다운로드 시 바탕화면, D드라이브 등 원하는 폴더 위치를 직접 지정하여 저장할 수 있습니다.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- History Drawer Modal (압축 및 변환 내역) -->
+  <div class="drawer-overlay" id="historyOverlay">
+    <div class="history-drawer" id="historyDrawer">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <h3>작업 히스토리</h3>
+        </div>
+        <button type="button" class="btn-close-drawer" id="closeHistoryBtn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="drawer-body">
+        <div class="history-summary-bar">
+          <span id="historyTotalText">총 0건의 작업 기록</span>
+          <button type="button" class="btn-clear-history" id="clearHistoryBtn">
+            <i class="fa-regular fa-trash-can"></i> 전체 삭제
+          </button>
+        </div>
+
+        <div class="history-list" id="historyListContainer">
+          <!-- Dynamic History Items -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Modal (2. 삼성 smart switch 삭제, Google 드라이브 및 Gmail 유지) -->
+  <div class="modal-overlay" id="shareModalOverlay">
+    <div class="share-modal" id="shareModal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-share-nodes"></i>
+          <h3>파일 공유하기</h3>
+        </div>
+        <button type="button" class="btn-close-modal" id="closeShareModalBtn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="share-intro">완료된 <strong id="shareModalFileName">파일</strong>을 원하는 서비스로 간편하게 전송 및 공유하세요.</p>
+
+        <div class="share-options-grid">
+          <!-- 1. Quick Share Direct Option -->
+          <button type="button" class="share-option-card quickshare-card" id="quickShareBtn">
+            <div class="opt-icon-wrapper quickshare-icon">
+              <svg viewBox="0 0 48 48" width="28" height="28">
+                <circle cx="24" cy="24" r="22" fill="#0066FF" />
+                <path d="M14 24L20 18V22H28V26H20V30L14 24Z" fill="#ffffff" />
+                <path d="M34 24L28 30V26H20V22H28V18L34 24Z" fill="#ffffff" />
+                <circle cx="16" cy="24" r="2.5" fill="#0066FF" />
+                <circle cx="32" cy="24" r="2.5" fill="#0066FF" />
+              </svg>
+            </div>
+            <div class="opt-info">
+              <h4>Quick Share로 바로 보내기</h4>
+              <p>설치된 Quick Share 앱을 열어 주변 갤럭시 및 PC로 즉시 파일 전송</p>
+            </div>
+            <i class="fa-solid fa-paper-plane opt-arrow" style="color: #0066FF;"></i>
+          </button>
+
+          <!-- 2. Google Drive Option -->
+          <a href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="noopener noreferrer"
+            class="share-option-card google-drive-card" id="googleDriveShareBtn">
+            <div class="opt-icon-wrapper gdrive">
+              <svg viewBox="0 0 87.3 78" width="30" height="30">
+                <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z"
+                  fill="#0066da" />
+                <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44c-.8 1.4-1.2 2.95-1.2 4.5h27.5z"
+                  fill="#00ac47" />
+                <path
+                  d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.5l5.85 10.15z"
+                  fill="#ea4335" />
+                <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d" />
+                <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z"
+                  fill="#2684fc" />
+                <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z"
+                  fill="#ffba00" />
+              </svg>
+            </div>
+            <div class="opt-info">
+              <h4>Google 드라이브로 업로드</h4>
+              <p>Google Drive 내 드라이브로 이동하여 파일 즉시 저장</p>
+            </div>
+            <i class="fa-solid fa-arrow-up-right-from-square opt-arrow"></i>
+          </a>
+
+          <!-- 3. Gmail Direct Compose Option -->
+          <button type="button" class="share-option-card gmail-card" id="gmailShareBtn">
+            <div class="opt-icon-wrapper gmail-share">
+              <svg viewBox="0 0 24 24" width="28" height="28">
+                <path fill="#4285f4"
+                  d="M1.5 5.5v13a2 2 0 0 0 2 2h2V9.8l6.5 4.9 6.5-4.9v10.7h2a2 2 0 0 0 2-2v-13a2 2 0 0 0-3.2-1.6L12 9.2 2.7 3.9A2 2 0 0 0 1.5 5.5z" />
+                <path fill="#ea4335"
+                  d="M22 5.5v2.8l-10 7.5-10-7.5V5.5c0-.9.7-1.6 1.6-1.6.4 0 .7.1 1.1.4L12 9.2l7.3-5.4c.4-.3.7-.4 1.1-.4.9 0 1.6.7 1.6 1.6z" />
+              </svg>
+            </div>
+            <div class="opt-info">
+              <h4>Gmail로 전송하기</h4>
+              <p>Google Gmail 웹 메일 작성창을 즉시 열어 내용 전송</p>
+            </div>
+            <i class="fa-solid fa-arrow-up-right-from-square opt-arrow"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p class="footer-univ">국립한국해양대학교 (Korea Maritime & Ocean University)</p>
+      <p class="footer-copy">49112 부산광역시 영도구 태종로 727 (동삼동) 국립한국해양대학교 | 대표전화 051-410-4114</p>
+      <p class="footer-rights">© Korea Maritime & Ocean University. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

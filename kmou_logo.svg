@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- KMOU Official Navy Emblem Vector Recreation -->
+  <defs>
+    <path id="textCircleTop" d="M 55,250 A 195,195 0 1,1 445,250" fill="none" />
+    <path id="textCircleBottom" d="M 445,250 A 195,195 0 0,1 55,250" fill="none" />
+  </defs>
+  <!-- Outer Double Circle Border -->
+  <circle cx="250" cy="250" r="235" fill="none" stroke="#00358e" stroke-width="12" />
+  <circle cx="250" cy="250" r="170" fill="none" stroke="#00358e" stroke-width="5" />
+  
+  <!-- English Circular Text Top -->
+  <text fill="#00358e" font-family="'Arial Black', 'Impact', sans-serif" font-weight="900" font-size="27.5" letter-spacing="1.5">
+    <textPath href="#textCircleTop" startOffset="50%" text-anchor="middle">
+      KOREA MARITIME &amp; OCEAN UNIVERSITY
+    </textPath>
+  </text>
+  
+  <!-- NATIONAL Text -->
+  <text x="250" y="125" fill="#00358e" font-family="'Arial Black', sans-serif" font-weight="900" font-size="28" text-anchor="middle" letter-spacing="3">
+    NATIONAL
+  </text>
+  
+  <!-- Center Crown / Lighthouse / Anchor Symbol -->
+  <g fill="#00358e">
+    <!-- Top Cap -->
+    <rect x="236" y="138" width="28" height="26" rx="3" />
+    <!-- Horizontal Crossbar -->
+    <path d="M 160,164 L 340,164 L 330,190 L 170,190 Z" />
+    <!-- 4 Vertical Columns -->
+    <path d="M 152,192 L 182,192 L 172,305 L 142,305 Z" />
+    <path d="M 210,192 L 235,192 L 232,310 L 207,310 Z" />
+    <path d="M 265,192 L 290,192 L 293,310 L 268,310 Z" />
+    <path d="M 318,192 L 348,192 L 358,305 L 328,305 Z" />
+  </g>
+  
+  <!-- Lower Ocean Wave Crest Shield -->
+  <g>
+    <!-- Wave Bottom Base -->
+    <path d="M 68,310 C 130,370 370,370 432,310 C 435,395 365,465 250,465 C 135,465 65,395 68,310 Z" fill="#00358e" />
+    <!-- Waves Lines (White) -->
+    <path d="M 80,318 C 145,360 215,290 290,325 C 345,350 395,335 420,318" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" />
+    <path d="M 85,342 C 148,382 218,315 292,350 C 345,372 390,358 415,342" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" />
+    <path d="M 95,368 C 152,404 220,342 295,375 C 342,394 380,382 405,368" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" />
+  </g>
+  
+  <!-- 1945 & Open Book Graphic in Shield -->
+  <text x="250" y="420" fill="#ffffff" font-family="'Arial Black', sans-serif" font-weight="900" font-size="30" text-anchor="middle" letter-spacing="4">
+    1945
+  </text>
+  <path d="M 215,432 C 235,423 248,436 250,440 C 252,436 265,423 285,432 C 275,445 255,446 250,443 C 245,446 225,445 215,432 Z" fill="#ffffff" />
+  
+  <!-- Korean Text in Bottom Ribbon -->
+  <text fill="#ffffff" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" font-weight="900" font-size="26" letter-spacing="3">
+    <!-- Left: 국립 한국 -->
+    <text x="82" y="380" transform="rotate(-32, 100, 380)">국</text>
+    <text x="106" y="415" transform="rotate(-18, 120, 415)">립</text>
+    <text x="145" y="445" transform="rotate(-5, 155, 445)">한</text>
+    <text x="180" y="455" transform="rotate(5, 185, 455)">국</text>
+    <!-- Right: 해양대학교 -->
+    <text x="300" y="455" transform="rotate(-5, 305, 455)">해</text>
+    <text x="335" y="445" transform="rotate(6, 340, 445)">양</text>
+    <text x="370" y="418" transform="rotate(20, 375, 418)">대</text>
+    <text x="398" y="380" transform="rotate(35, 400, 380)">학</text>
+    <text x="415" y="340" transform="rotate(50, 415, 340)">교</text>
+  </text>
+</svg>
